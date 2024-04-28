@@ -27,8 +27,15 @@ func main() {
 		ApiKey:   os.Getenv("APIKEY"),
 	}
 
+	name := "hoge.hoge.com."
+	recordType := "CNAME"
+	ttl := "3600"
+	content := "huga.hoge.com."
+
+	//ゾーンの参照
 	// showZones(api)
-	resp, err := addRecords(api, "hoge.hoge.com.", "CNAME", "3600", "huga.hoge.com.")
+	//レコード追加
+	resp, err := addRecords(api, name, recordType, ttl, content)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
