@@ -1,15 +1,14 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 
 	"github.com/joho/godotenv"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 type API struct {
@@ -18,6 +17,26 @@ type API struct {
 }
 
 func main() {
+	//インスタンス作成
+	e := echo.New()
+
+	//ミドルウェア設定
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+
+	e.GET("/", dns)
+
+	e.Logger.Fatal(e.Start(":8088"))
+}
+
+func dns(c echo.Context) error {
+	if err := sub(); err != nil {
+		return err
+	}
+	return c.String(http.StatusOK, "Record added successfully")
+}
+
+func sub() error {
 	if err := godotenv.Load(); err != nil {
 		log.Fatalln(err)
 	}
@@ -27,10 +46,10 @@ func main() {
 		ApiKey:   os.Getenv("APIKEY"),
 	}
 
-	name := "hoge.hoge.com."
+	name := "example.hoge.com."
 	recordType := "CNAME"
 	ttl := "3600"
-	content := "huga.hoge.com."
+	content := "hoge.hoge.com."
 
 	//ゾーンの参照
 	// showZones(api)
@@ -38,68 +57,10 @@ func main() {
 	resp, err := addRecords(api, name, recordType, ttl, content)
 	if err != nil {
 		fmt.Println("Error:", err)
-		return
+		return err
 	}
 	defer resp.Body.Close()
 	fmt.Println("Response Status:", resp.Status)
-}
 
-func showZones(api API) {
-
-	req, err := http.NewRequest("GET", api.Endpoint, nil)
-	if err != nil {
-		fmt.Print("1", err)
-		return
-	}
-
-	req.Header.Set("X-API-Key", api.ApiKey)
-	//リクエスト処理
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		fmt.Print("2", err)
-		return
-	}
-	defer resp.Body.Close()
-
-	body, err := ioutil.ReadAll(resp.Body)
-	fmt.Print(string(body))
-}
-
-// レコード追加処理
-func addRecords(api API, name, recordType, ttl, content string) (*http.Response, error) {
-	params := map[string]interface{}{
-		"rrsets": []map[string]interface{}{
-			{
-				"name":       name,
-				"type":       recordType,
-				"ttl":        ttl,
-				"changetype": "REPLACE",
-				"comments":   []interface{}{},
-				"records": []map[string]interface{}{
-					{
-						"content":  content,
-						"disabled": false,
-					},
-				},
-			},
-		},
-	}
-	//json形式にするやつ
-	payloadBytes, _ := json.Marshal(params)
-	//zoneを指定してエンドポイントにつける
-	zone := os.Getenv("ZONE")
-	endpoint := api.Endpoint + zone
-	//リクエスト処理
-	req, err := http.NewRequest(http.MethodPatch, endpoint, bytes.NewReader(payloadBytes))
-	req.Header.Set("X-API-Key", api.ApiKey)
-	req.Header.Set("Content-Type", "application/json")
-
-	client := http.DefaultClient
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	return resp, nil
+	return nil
 }
