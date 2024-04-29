@@ -4,17 +4,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 
-	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
-
-type API struct {
-	Endpoint string
-	ApiKey   string
-}
 
 func main() {
 	//jsonファイルのデコード
@@ -24,12 +17,6 @@ func main() {
 	}
 	//サーバ起動
 	server(config)
-}
-
-func env() {
-	if err := godotenv.Load(); err != nil {
-		log.Fatalln(err)
-	}
 }
 
 func server(config *Config) {
@@ -60,12 +47,6 @@ func addDnsHandler(c echo.Context) error {
 }
 
 func dns(config *Config) error {
-	env()
-
-	api := API{
-		Endpoint: os.Getenv("ENDPOINT"),
-		ApiKey:   os.Getenv("APIKEY"),
-	}
 
 	name := config.Name
 	recordType := config.RecordType
@@ -73,7 +54,7 @@ func dns(config *Config) error {
 	content := config.Content
 
 	//レコード追加
-	resp, err := AddRecords(api, name, recordType, ttl, content)
+	resp, err := AddRecords(name, recordType, ttl, content)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return err

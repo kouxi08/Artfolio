@@ -7,9 +7,26 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+
+	"github.com/kouxi08/Artfolio/utils/env"
 )
 
-func GetZoneList(api API) {
+type API struct {
+	Endpoint string
+	ApiKey   string
+}
+
+func GetAPI() API {
+	return API{
+		Endpoint: os.Getenv("ENDPOINT"),
+		ApiKey:   os.Getenv("APIKEY"),
+	}
+
+}
+
+func GetZoneList() {
+	env.Env()
+	api := GetAPI()
 
 	req, err := http.NewRequest("GET", api.Endpoint, nil)
 	if err != nil {
@@ -32,7 +49,9 @@ func GetZoneList(api API) {
 }
 
 // レコード追加処理
-func AddRecords(api API, name, recordType, ttl, content string) (*http.Response, error) {
+func AddRecords(name, recordType, ttl, content string) (*http.Response, error) {
+	env.Env()
+	api := GetAPI()
 	params := map[string]interface{}{
 		"rrsets": []map[string]interface{}{
 			{
