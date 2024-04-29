@@ -8,7 +8,10 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	apiv1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
+	v1beta1 "k8s.io/api/extensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
@@ -95,6 +98,76 @@ func CreateDeployment() {
 		panic(err)
 	}
 	fmt.Printf("Created deployment %q.\n", result.GetObjectMeta().GetName())
+}
+
+func CreateService() {
+	clientset, err := NewKubernetesClient()
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	serviceClient := clientset.CoreV1().Services(apiv1.NamespaceDefault)
+
+	service := &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "demo",
+		},
+		Spec: corev1.ServiceSpec{
+			Ports: []corev1.ServicePort{
+				{
+					Name:       "http",
+					Port:       80,
+					TargetPort: intstr.FromInt(8080),
+				},
+			},
+			Selector: map[string]string{
+				"app": "demo",
+			},
+		},
+	}
+
+	// Create Service
+	fmt.Println("Creating service...")
+	result, err := serviceClient.Create(context.TODO(), service, metav1.CreateOptions{})
+	if err != nil {
+		panic(err)
+	}
+	log.Fatal(result)
+}
+
+func CreateIngress() {
+	clientset, err := NewKubernetesClient()
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	ingressClient := clientset.ExtensionsV1beta1().Ingresses("default")
+
+	ingress := &v1beta1.Ingress{
+		TypeMeta: metav1.TypeMeta{
+			Kind: "Ingress",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "ingress-rule-created-from-go",
+			Namespace: "default",
+		},
+		Spec: v1beta1.IngressSpec{
+			Backend: &v1beta1.IngressBackend{
+				ServiceName: "demo",
+
+				ServicePort: intstr.FromInt(80),
+			},
+			Rules: []v1beta1.IngressRule{{Host: "ex.Artfolio.com"}},
+		},
+	}
+	fmt.Println("Creating ingress...")
+	result, err := ingressClient.Create(context.TODO(), ingress, metav1.CreateOptions{})
+	if err != nil {
+		fmt.Print(err)
+	}
+	fmt.Printf("Created Ingress %q.\n", result.GetObjectMeta().GetName())
 }
 
 func int32Ptr(i int32) *int32 { return &i }
