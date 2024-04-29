@@ -87,3 +87,22 @@ func AddRecords(name, recordType, ttl, content string) (*http.Response, error) {
 
 	return resp, nil
 }
+
+func Dns(config *Config) error {
+
+	name := config.Name
+	recordType := config.RecordType
+	ttl := config.TTL
+	content := config.Content
+
+	//レコード追加
+	resp, err := AddRecords(name, recordType, ttl, content)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return err
+	}
+	defer resp.Body.Close()
+	fmt.Println("Response Status:", resp.Status)
+
+	return nil
+}
