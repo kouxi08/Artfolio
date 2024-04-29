@@ -17,10 +17,12 @@ type API struct {
 }
 
 func main() {
+	//jsonファイルのデコード
 	config, err := LoadConfig("config.json")
 	if err != nil {
 		log.Fatal(err)
 	}
+	//サーバ起動
 	server(config)
 }
 
@@ -43,7 +45,7 @@ func server(config *Config) {
 			return next(c)
 		}
 	})
-
+	//レコード追加処理にルーティング
 	e.GET("/addrecode", addDnsHandler)
 	// e.GET("/", showDnsHandler)
 
@@ -56,13 +58,6 @@ func addDnsHandler(c echo.Context) error {
 	}
 	return c.String(http.StatusOK, "Record added successfully")
 }
-
-// func showDnsHandler(c echo.Context) error {
-// 	if err := showZones(api); err != nil {
-// 		return err
-// 	}
-// 	return c.String(http.StatusOK, "")
-// }
 
 func dns(config *Config) error {
 	env()
