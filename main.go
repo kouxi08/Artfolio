@@ -73,7 +73,7 @@ func dns(config *Config) error {
 	content := config.Content
 
 	//レコード追加
-	resp, err := addRecords(api, name, recordType, ttl, content)
+	resp, err := AddRecords(api, name, recordType, ttl, content)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return err

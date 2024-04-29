@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-func showZones(api API) {
+func GetZoneList(api API) {
 
 	req, err := http.NewRequest("GET", api.Endpoint, nil)
 	if err != nil {
@@ -32,7 +32,7 @@ func showZones(api API) {
 }
 
 // レコード追加処理
-func addRecords(api API, name, recordType, ttl, content string) (*http.Response, error) {
+func AddRecords(api API, name, recordType, ttl, content string) (*http.Response, error) {
 	params := map[string]interface{}{
 		"rrsets": []map[string]interface{}{
 			{

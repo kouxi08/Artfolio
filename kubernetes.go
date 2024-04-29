@@ -12,7 +12,7 @@ import (
 	"k8s.io/client-go/util/homedir"
 )
 
-func test() {
+func GetKubernetesNodes() {
 	kubeconfig := filepath.Join(homedir.HomeDir(), ".kube", "config")
 
 	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
