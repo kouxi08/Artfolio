@@ -77,7 +77,7 @@ func AddRecords(name, recordType, ttl, content string) (*http.Response, error) {
 	zone := os.Getenv("ZONE")
 	endpoint := api.Endpoint + zone
 	//リクエスト処理
-	req, err := http.NewRequest(http.MethodPatch, endpoint, bytes.NewReader(payloadBytes))
+	req, _ := http.NewRequest(http.MethodPatch, endpoint, bytes.NewReader(payloadBytes))
 	req.Header.Set("X-API-Key", api.ApiKey)
 	req.Header.Set("Content-Type", "application/json")
 
