@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/kouxi08/Artfolio/utils/env"
+	"github.com/kouxi08/Artfolio/utils"
 )
 
 type API struct {
@@ -25,7 +25,7 @@ func GetAPI() API {
 }
 
 func GetZoneList() {
-	env.Env()
+	utils.Env()
 	api := GetAPI()
 
 	req, err := http.NewRequest("GET", api.Endpoint, nil)
@@ -50,7 +50,7 @@ func GetZoneList() {
 
 // レコード追加処理
 func AddRecords(name, recordType, ttl, content string) (*http.Response, error) {
-	env.Env()
+	utils.Env()
 	api := GetAPI()
 	params := map[string]interface{}{
 		"rrsets": []map[string]interface{}{
