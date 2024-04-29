@@ -9,7 +9,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	apiv1 "k8s.io/api/core/v1"
 
-	v1beta1 "k8s.io/api/networking/v1beta1"
+	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/kubernetes"
@@ -111,14 +111,14 @@ func CreateService() {
 
 	service := &apiv1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "demo",
+			Name: "demo-service",
 		},
 		Spec: apiv1.ServiceSpec{
 			Ports: []apiv1.ServicePort{
 				{
 					Name:       "http",
 					Port:       80,
-					TargetPort: intstr.FromInt(8080),
+					TargetPort: intstr.FromInt(80),
 				},
 			},
 			Selector: map[string]string{
@@ -143,23 +143,43 @@ func CreateIngress() {
 		return
 	}
 
-	ingressClient := clientset.NetworkingV1beta1().Ingresses("default")
+	ingressClient := clientset.NetworkingV1().Ingresses("default")
 
-	ingress := &v1beta1.Ingress{
+	nginxServiceName := "nginx"
+	pathType := networkingv1.PathTypePrefix
+
+	ingress := &networkingv1.Ingress{
 		TypeMeta: metav1.TypeMeta{
 			Kind: "Ingress",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "ingress-rule-created-from-go",
-			Namespace: "default",
+			Name: "ingress-rule-created-from-go",
 		},
-		Spec: v1beta1.IngressSpec{
-			Backend: &v1beta1.IngressBackend{
-				ServiceName: "demo",
-
-				ServicePort: intstr.FromInt(80),
+		Spec: networkingv1.IngressSpec{
+			IngressClassName: &nginxServiceName,
+			Rules: []networkingv1.IngressRule{
+				{
+					Host: "ex.artfolio.com",
+					IngressRuleValue: networkingv1.IngressRuleValue{
+						HTTP: &networkingv1.HTTPIngressRuleValue{
+							Paths: []networkingv1.HTTPIngressPath{
+								{
+									Path:     "/",
+									PathType: &pathType,
+									Backend: networkingv1.IngressBackend{
+										Service: &networkingv1.IngressServiceBackend{
+											Name: "demo-service",
+											Port: networkingv1.ServiceBackendPort{
+												Number: 80,
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
 			},
-			Rules: []v1beta1.IngressRule{{Host: "ex.Artfolio.com"}},
 		},
 	}
 	fmt.Println("Creating ingress...")
