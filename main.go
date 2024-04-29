@@ -17,42 +17,66 @@ type API struct {
 }
 
 func main() {
+	config, err := LoadConfig("config.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+	server(config)
+}
+
+func env() {
+	if err := godotenv.Load(); err != nil {
+		log.Fatalln(err)
+	}
+}
+
+func server(config *Config) {
 	//インスタンス作成
 	e := echo.New()
 
 	//ミドルウェア設定
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			c.Set("config", config)
+			return next(c)
+		}
+	})
 
-	e.GET("/", dns)
+	e.GET("/addrecode", addDnsHandler)
+	// e.GET("/", showDnsHandler)
 
 	e.Logger.Fatal(e.Start(":8088"))
 }
 
-func dns(c echo.Context) error {
-	if err := sub(); err != nil {
+func addDnsHandler(c echo.Context) error {
+	if err := dns(c.Get("config").(*Config)); err != nil {
 		return err
 	}
 	return c.String(http.StatusOK, "Record added successfully")
 }
 
-func sub() error {
-	if err := godotenv.Load(); err != nil {
-		log.Fatalln(err)
-	}
+// func showDnsHandler(c echo.Context) error {
+// 	if err := showZones(api); err != nil {
+// 		return err
+// 	}
+// 	return c.String(http.StatusOK, "")
+// }
+
+func dns(config *Config) error {
+	env()
 
 	api := API{
 		Endpoint: os.Getenv("ENDPOINT"),
 		ApiKey:   os.Getenv("APIKEY"),
 	}
 
-	name := "example.hoge.com."
-	recordType := "CNAME"
-	ttl := "3600"
-	content := "hoge.hoge.com."
+	name := config.Name
+	recordType := config.RecordType
+	ttl := config.TTL
+	content := config.Content
 
-	//ゾーンの参照
-	// showZones(api)
 	//レコード追加
 	resp, err := addRecords(api, name, recordType, ttl, content)
 	if err != nil {
