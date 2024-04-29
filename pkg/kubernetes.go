@@ -8,8 +8,8 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	apiv1 "k8s.io/api/core/v1"
-	corev1 "k8s.io/api/core/v1"
-	v1beta1 "k8s.io/api/extensions/v1beta1"
+
+	v1beta1 "k8s.io/api/networking/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/kubernetes"
@@ -109,12 +109,12 @@ func CreateService() {
 
 	serviceClient := clientset.CoreV1().Services(apiv1.NamespaceDefault)
 
-	service := &corev1.Service{
+	service := &apiv1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "demo",
 		},
-		Spec: corev1.ServiceSpec{
-			Ports: []corev1.ServicePort{
+		Spec: apiv1.ServiceSpec{
+			Ports: []apiv1.ServicePort{
 				{
 					Name:       "http",
 					Port:       80,
@@ -133,7 +133,7 @@ func CreateService() {
 	if err != nil {
 		panic(err)
 	}
-	log.Fatal(result)
+	fmt.Printf("Created service%q.\n", result.GetObjectMeta().GetName())
 }
 
 func CreateIngress() {
@@ -143,7 +143,7 @@ func CreateIngress() {
 		return
 	}
 
-	ingressClient := clientset.ExtensionsV1beta1().Ingresses("default")
+	ingressClient := clientset.NetworkingV1beta1().Ingresses("default")
 
 	ingress := &v1beta1.Ingress{
 		TypeMeta: metav1.TypeMeta{
