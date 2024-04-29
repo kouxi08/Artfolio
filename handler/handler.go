@@ -3,12 +3,10 @@ package handler
 import (
 	"net/http"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
-func addDnsHandler(c echo.Context) error {
-	// if err := Dns(c.Get("config").(*Config)); err != nil {
-	// 	return err
-	// }
+func AddDnsHandler(c echo.Context) error {
+
 	return c.String(http.StatusOK, "Record added successfully")
 }

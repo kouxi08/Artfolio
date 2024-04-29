@@ -1,4 +1,4 @@
-package main
+package pkg
 
 import (
 	"bytes"
@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+
+	"github.com/kouxi08/Artfolio/config"
 
 	"github.com/kouxi08/Artfolio/utils"
 )
@@ -88,7 +90,7 @@ func AddRecords(name, recordType, ttl, content string) (*http.Response, error) {
 	return resp, nil
 }
 
-func Dns(config *Config) error {
+func Dns(config *config.Config) error {
 
 	name := config.Name
 	recordType := config.RecordType
