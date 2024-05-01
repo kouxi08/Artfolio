@@ -48,6 +48,7 @@ func GetKubernetesNodes() {
 
 }
 
+// deploymentを作成する処理
 func CreateDeployment(app string, deploymentName string) {
 	clientset, err := NewKubernetesClient()
 	if err != nil {
@@ -100,6 +101,7 @@ func CreateDeployment(app string, deploymentName string) {
 	fmt.Printf("Created deployment %q.\n", result.GetObjectMeta().GetName())
 }
 
+// serviceを作成する処理
 func CreateService(app string, serviceName string) {
 	clientset, err := NewKubernetesClient()
 	if err != nil {
@@ -136,6 +138,7 @@ func CreateService(app string, serviceName string) {
 	fmt.Printf("Created service%q.\n", result.GetObjectMeta().GetName())
 }
 
+// ingressを作成する処理
 func CreateIngress(ingressName string, hostName string, serviceName string) {
 	clientset, err := NewKubernetesClient()
 	if err != nil {
@@ -188,6 +191,66 @@ func CreateIngress(ingressName string, hostName string, serviceName string) {
 		fmt.Print(err)
 	}
 	fmt.Printf("Created Ingress %q.\n", result.GetObjectMeta().GetName())
+}
+
+// deploymentを削除する処理
+func DeleteDeployment(deploymentName string) {
+	clientset, err := NewKubernetesClient()
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	deploymentClient := clientset.AppsV1().Deployments(apiv1.NamespaceDefault)
+	deletePolicy := metav1.DeletePropagationForeground
+
+	fmt.Println("Deleting deployment...")
+	if err := deploymentClient.Delete(context.TODO(), deploymentName, metav1.DeleteOptions{
+		PropagationPolicy: &deletePolicy,
+	}); err != nil {
+		panic(err)
+	}
+	fmt.Println("Deleted deployment.")
+}
+
+// serviceを削除する処理
+func DeleteService(serviceName string) {
+	clientset, err := NewKubernetesClient()
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	serviceClient := clientset.CoreV1().Services(apiv1.NamespaceDefault)
+	deletePolicy := metav1.DeletePropagationForeground
+
+	fmt.Println("Deleting service...")
+	if err := serviceClient.Delete(context.TODO(), serviceName, metav1.DeleteOptions{
+		PropagationPolicy: &deletePolicy,
+	}); err != nil {
+		panic(err)
+	}
+	fmt.Println("Deleted service.")
+}
+
+// ingressを削除する処理
+func DeleteIngress(ingressName string) {
+	clientset, err := NewKubernetesClient()
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	ingressClient := clientset.NetworkingV1().Ingresses("default")
+	deletePolicy := metav1.DeletePropagationForeground
+
+	fmt.Println("Deleting ingress...")
+	if err := ingressClient.Delete(context.TODO(), ingressName, metav1.DeleteOptions{
+		PropagationPolicy: &deletePolicy,
+	}); err != nil {
+		panic(err)
+	}
+	fmt.Println("Deleted ingress.")
 }
 
 func int32Ptr(i int32) *int32 { return &i }

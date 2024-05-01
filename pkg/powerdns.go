@@ -53,6 +53,7 @@ func AddRecords(name, recordType, ttl, content string) (*http.Response, error) {
 	utils.Env()
 
 	method := http.MethodPost
+	//追加するレコードを指定
 	params := map[string]interface{}{
 		"rrsets": []map[string]interface{}{
 			{
@@ -70,6 +71,7 @@ func AddRecords(name, recordType, ttl, content string) (*http.Response, error) {
 			},
 		},
 	}
+	//httpリクエストする処理
 	resp, err := SendHTTPRequest(params, method)
 	if err != nil {
 		return nil, err
@@ -77,10 +79,12 @@ func AddRecords(name, recordType, ttl, content string) (*http.Response, error) {
 	return resp, nil
 }
 
+// レコード削除処理
 func DeleteRecords(name string) (*http.Response, error) {
 	utils.Env()
 
 	method := http.MethodPatch
+	//削除するレコードの指定
 	params := map[string]interface{}{
 		"rrsets": []map[string]interface{}{
 			{
@@ -90,6 +94,7 @@ func DeleteRecords(name string) (*http.Response, error) {
 			},
 		},
 	}
+	//httpリクエストする処理
 	resp, err := SendHTTPRequest(params, method)
 	if err != nil {
 		return nil, err

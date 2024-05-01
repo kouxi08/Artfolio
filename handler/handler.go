@@ -44,18 +44,28 @@ func CreateHandler(c echo.Context) error {
 }
 
 func DeleteHandler(c echo.Context) error {
-	config := c.Get("config").(*config.Config)
+	config, err := config.LoadConfig("config.json")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	siteName := c.FormValue("name")
+	deleteRecordName := fmt.Sprintf("%s%s", siteName, config.Record.Name)
 
-	name := fmt.Sprintf("%s%s", siteName, config.Record.Name)
+	deploymentName := fmt.Sprintf("%s%s", siteName, config.KubeConfig.DeploymentName)
+	serviceName := fmt.Sprintf("%s%s", siteName, config.KubeConfig.ServiceName)
+	ingressName := fmt.Sprintf("%s%s", siteName, config.KubeConfig.IngressName)
 
-	resp, err := pkg.DeleteRecords(name)
+	resp, err := pkg.DeleteRecords(deleteRecordName)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return err
 	}
 	defer resp.Body.Close()
 	fmt.Println("Response Status:", resp.Status)
+
+	pkg.DeleteDeployment(deploymentName)
+	pkg.DeleteService(serviceName)
+	pkg.DeleteIngress(ingressName)
 	return c.String(http.StatusOK, "Record delete successfully")
 }
