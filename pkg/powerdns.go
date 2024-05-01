@@ -51,7 +51,8 @@ func GetZoneList() {
 // レコード追加処理
 func AddRecords(name, recordType, ttl, content string) (*http.Response, error) {
 	utils.Env()
-	api := GetAPI()
+
+	method := http.MethodPost
 	params := map[string]interface{}{
 		"rrsets": []map[string]interface{}{
 			{
@@ -69,28 +70,17 @@ func AddRecords(name, recordType, ttl, content string) (*http.Response, error) {
 			},
 		},
 	}
-	//json形式にするやつ
-	payloadBytes, _ := json.Marshal(params)
-	//zoneを指定してエンドポイントにつける
-	zone := os.Getenv("ZONE")
-	endpoint := api.Endpoint + zone
-	//リクエスト処理
-	req, _ := http.NewRequest(http.MethodPatch, endpoint, bytes.NewReader(payloadBytes))
-	req.Header.Set("X-API-Key", api.ApiKey)
-	req.Header.Set("Content-Type", "application/json")
-
-	client := http.DefaultClient
-	resp, err := client.Do(req)
+	resp, err := SendHTTPRequest(params, method)
 	if err != nil {
 		return nil, err
 	}
-
 	return resp, nil
 }
 
 func DeleteRecords(name string) (*http.Response, error) {
 	utils.Env()
-	api := GetAPI()
+
+	method := http.MethodPatch
 	params := map[string]interface{}{
 		"rrsets": []map[string]interface{}{
 			{
@@ -100,13 +90,23 @@ func DeleteRecords(name string) (*http.Response, error) {
 			},
 		},
 	}
+	resp, err := SendHTTPRequest(params, method)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+
+}
+
+func SendHTTPRequest(params map[string]interface{}, method string) (*http.Response, error) {
+	api := GetAPI()
 	//json形式にするやつ
 	payloadBytes, _ := json.Marshal(params)
 	//zoneを指定してエンドポイントにつける
 	zone := os.Getenv("ZONE")
 	endpoint := api.Endpoint + zone
 	//リクエスト処理
-	req, _ := http.NewRequest(http.MethodPatch, endpoint, bytes.NewReader(payloadBytes))
+	req, _ := http.NewRequest(method, endpoint, bytes.NewReader(payloadBytes))
 	req.Header.Set("X-API-Key", api.ApiKey)
 	req.Header.Set("Content-Type", "application/json")
 
