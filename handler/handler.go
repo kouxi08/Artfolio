@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/kouxi08/Artfolio/config"
@@ -10,7 +11,10 @@ import (
 )
 
 func CreateHandler(c echo.Context) error {
-	config := c.Get("config").(*config.Config)
+	config, err := config.LoadConfig("config.json")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	siteName := c.FormValue("name")
 	newRecordName := fmt.Sprintf("%s%s", siteName, config.Record.Name)
@@ -29,8 +33,11 @@ func CreateHandler(c echo.Context) error {
 	defer resp.Body.Close()
 	fmt.Println("Response Status:", resp.Status)
 
+	//deployment作成
 	pkg.CreateDeployment(siteName, deploymentName)
+	//service作成
 	pkg.CreateService(siteName, serviceName)
+	//ingress作成
 	pkg.CreateIngress(ingressName, hostName, serviceName)
 
 	return c.String(http.StatusOK, "Record added successfully")

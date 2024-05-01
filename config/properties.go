@@ -16,5 +16,5 @@ type KubeConfig struct {
 
 type Config struct {
 	Record     Record     `json:"record"`
-	KubeConfig KubeConfig `json:"kubeconfig"`
+	KubeConfig KubeConfig `json:"kubeConfig"`
 }
