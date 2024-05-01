@@ -8,8 +8,6 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/kouxi08/Artfolio/config"
-
 	"github.com/kouxi08/Artfolio/utils"
 )
 
@@ -90,21 +88,33 @@ func AddRecords(name, recordType, ttl, content string) (*http.Response, error) {
 	return resp, nil
 }
 
-func Dns(config *config.Config) error {
-
-	name := config.Name
-	recordType := config.RecordType
-	ttl := config.TTL
-	content := config.Content
-
-	//レコード追加
-	resp, err := AddRecords(name, recordType, ttl, content)
-	if err != nil {
-		fmt.Println("Error:", err)
-		return err
+func DeleteRecords(name string) (*http.Response, error) {
+	utils.Env()
+	api := GetAPI()
+	params := map[string]interface{}{
+		"rrsets": []map[string]interface{}{
+			{
+				"type":       "CNAME",
+				"name":       name,
+				"changetype": "DELETE",
+			},
+		},
 	}
-	defer resp.Body.Close()
-	fmt.Println("Response Status:", resp.Status)
+	//json形式にするやつ
+	payloadBytes, _ := json.Marshal(params)
+	//zoneを指定してエンドポイントにつける
+	zone := os.Getenv("ZONE")
+	endpoint := api.Endpoint + zone
+	//リクエスト処理
+	req, _ := http.NewRequest(http.MethodPatch, endpoint, bytes.NewReader(payloadBytes))
+	req.Header.Set("X-API-Key", api.ApiKey)
+	req.Header.Set("Content-Type", "application/json")
 
-	return nil
+	client := http.DefaultClient
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
 }

@@ -1,9 +1,6 @@
 package main
 
 import (
-	"log"
-
-	"github.com/kouxi08/Artfolio/config"
 	"github.com/kouxi08/Artfolio/handler"
 
 	"github.com/labstack/echo/v4"
@@ -12,30 +9,22 @@ import (
 
 func main() {
 	//jsonファイルのデコード
-	config, err := config.LoadConfig("config.json")
-	if err != nil {
-		log.Fatal(err)
-	}
 	//サーバ起動
-	server(config)
+	server()
 }
 
-func server(config *config.Config) {
+func server() {
 	//インスタンス作成
 	e := echo.New()
 
 	//ミドルウェア設定
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
-	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			c.Set("config", config)
-			return next(c)
-		}
-	})
-	//レコード追加処理にルーティング
-	e.GET("/addrecode", handler.AddDnsHandler)
-	// e.GET("/", showDnsHandler)
+
+	//レコード追加処理へ
+	e.POST("/", handler.CreateHandler)
+	//レコード削除処理へ
+	e.PATCH("/", handler.DeleteHandler)
 
 	e.Logger.Fatal(e.Start(":8088"))
 }

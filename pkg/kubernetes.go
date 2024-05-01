@@ -48,7 +48,7 @@ func GetKubernetesNodes() {
 
 }
 
-func CreateDeployment() {
+func CreateDeployment(app string, deploymentName string) {
 	clientset, err := NewKubernetesClient()
 	if err != nil {
 		log.Fatal(err)
@@ -59,19 +59,19 @@ func CreateDeployment() {
 
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "demo-deployment",
+			Name: deploymentName,
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas: int32Ptr(2),
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
-					"app": "demo",
+					"app": app,
 				},
 			},
 			Template: apiv1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
-						"app": "demo",
+						"app": app,
 					},
 				},
 				Spec: apiv1.PodSpec{
@@ -100,7 +100,7 @@ func CreateDeployment() {
 	fmt.Printf("Created deployment %q.\n", result.GetObjectMeta().GetName())
 }
 
-func CreateService() {
+func CreateService(app string, serviceName string) {
 	clientset, err := NewKubernetesClient()
 	if err != nil {
 		log.Fatal(err)
@@ -111,7 +111,7 @@ func CreateService() {
 
 	service := &apiv1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "demo-service",
+			Name: serviceName,
 		},
 		Spec: apiv1.ServiceSpec{
 			Ports: []apiv1.ServicePort{
@@ -122,7 +122,7 @@ func CreateService() {
 				},
 			},
 			Selector: map[string]string{
-				"app": "demo",
+				"app": app,
 			},
 		},
 	}
@@ -136,7 +136,7 @@ func CreateService() {
 	fmt.Printf("Created service%q.\n", result.GetObjectMeta().GetName())
 }
 
-func CreateIngress() {
+func CreateIngress(ingressName string, hostName string, serviceName string) {
 	clientset, err := NewKubernetesClient()
 	if err != nil {
 		log.Fatal(err)
@@ -153,13 +153,13 @@ func CreateIngress() {
 			Kind: "Ingress",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "ingress-rule-created-from-go",
+			Name: ingressName,
 		},
 		Spec: networkingv1.IngressSpec{
 			IngressClassName: &nginxServiceName,
 			Rules: []networkingv1.IngressRule{
 				{
-					Host: "ex.artfolio.com",
+					Host: hostName,
 					IngressRuleValue: networkingv1.IngressRuleValue{
 						HTTP: &networkingv1.HTTPIngressRuleValue{
 							Paths: []networkingv1.HTTPIngressPath{
@@ -168,7 +168,7 @@ func CreateIngress() {
 									PathType: &pathType,
 									Backend: networkingv1.IngressBackend{
 										Service: &networkingv1.IngressServiceBackend{
-											Name: "demo-service",
+											Name: serviceName,
 											Port: networkingv1.ServiceBackendPort{
 												Number: 80,
 											},
