@@ -52,7 +52,7 @@ func GetZoneList() {
 func AddRecords(name, recordType, ttl, content string) (*http.Response, error) {
 	utils.Env()
 
-	method := http.MethodPost
+	method := http.MethodPatch
 	//追加するレコードを指定
 	params := map[string]interface{}{
 		"rrsets": []map[string]interface{}{
