@@ -20,6 +20,7 @@ func server() {
 	//ミドルウェア設定
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.Use(middleware.CORS())
 
 	//レコード追加処理へ
 	e.POST("/", handler.CreateHandler)
