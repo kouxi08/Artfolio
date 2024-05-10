@@ -26,6 +26,8 @@ func server() {
 	e.POST("/", handler.CreateHandler)
 	//レコード削除処理へ
 	e.PATCH("/", handler.DeleteHandler)
+	//minioバケット追加処理
+	e.POST("/minio", handler.MakeBucketHandler)
 
 	e.Logger.Fatal(e.Start(":8088"))
 }

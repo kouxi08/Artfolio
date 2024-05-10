@@ -69,3 +69,12 @@ func DeleteHandler(c echo.Context) error {
 	pkg.DeleteIngress(ingressName)
 	return c.String(http.StatusOK, "Record delete successfully")
 }
+
+func MakeBucketHandler(c echo.Context) error {
+	bucketName := c.FormValue("name")
+	message, err := pkg.MakeBucket(bucketName)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error()) // エラーをHTTPレスポンスとして返す
+	}
+	return c.String(http.StatusOK, message)
+}
