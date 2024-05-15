@@ -34,7 +34,7 @@ func MakeBucket(bucketName string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return "Successfully created ", nil
+	return bucketName, nil
 }
 
 func RemoveBucket(bucketName string) (string, error) {
